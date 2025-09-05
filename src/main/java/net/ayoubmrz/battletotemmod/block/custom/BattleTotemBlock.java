@@ -2,9 +2,14 @@ package net.ayoubmrz.battletotemmod.block.custom;
 
 import com.mojang.serialization.MapCodec;
 import net.ayoubmrz.battletotemmod.block.ModBlocks;
+import net.ayoubmrz.battletotemmod.block.entity.BattleTotemBlockEntity;
+import net.ayoubmrz.battletotemmod.block.entity.ModBlockEntities;
 import net.ayoubmrz.battletotemmod.event.SpawnMobs;
 import net.ayoubmrz.battletotemmod.sound.ModSounds;
 import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
@@ -31,12 +36,9 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class BattleTotemBlock extends HorizontalFacingBlock {
+public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEntityProvider {
 
     public static final BooleanProperty USED = BooleanProperty.of("used");
-
-    public List<UUID> mobsList = new ArrayList<>();
-    public int mobsDeath = 0;
 
     public static final MapCodec<BattleTotemBlock> CODEC = createCodec(BattleTotemBlock::new);
     private static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
@@ -68,8 +70,22 @@ public class BattleTotemBlock extends HorizontalFacingBlock {
                     1f,
                     1.6f);
 
+            // Spawn mobs and track them
+            List<UUID> mobsList = new ArrayList<>();
             SpawnMobs.spawnMobs(world, pos, mobsList);
-            if (!world.isClient) System.out.println(mobsList);
+
+            // Store mob UUIDs in the block entity
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof BattleTotemBlockEntity totemEntity) {
+                totemEntity.addSpawnedMobs(mobsList);
+            }
+
+            // Also check if the other half has a block entity and update it
+            BlockPos otherPos = state.isOf(ModBlocks.BATTLE_TOTEM_TOP) ? pos.down() : pos.up();
+            BlockEntity otherBlockEntity = world.getBlockEntity(otherPos);
+            if (otherBlockEntity instanceof BattleTotemBlockEntity otherTotemEntity) {
+                otherTotemEntity.addSpawnedMobs(mobsList);
+            }
 
             if (state.isOf(ModBlocks.BATTLE_TOTEM_TOP)) {
                 world.setBlockState(pos, state.with(USED, true));
@@ -133,4 +149,22 @@ public class BattleTotemBlock extends HorizontalFacingBlock {
         return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
     }
 
+    @Nullable
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new BattleTotemBlockEntity(ModBlockEntities.BATTLE_TOTEM, pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return validateTicker(type, ModBlockEntities.BATTLE_TOTEM, BattleTotemBlockEntity::tick);
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> validateTicker(
+            BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker) {
+        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
+    }
 }

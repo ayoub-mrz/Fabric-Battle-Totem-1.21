@@ -3,13 +3,12 @@
 	"id": "battletotemmod",
 	"version": "${version}",
 	"name": "Battle Totem Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Adds the Battle Totem to Minecraft, activate it to summon waves of hostile mobs, survive the fight, and earn powerful rewards!",
 	"authors": [
-		"Me!"
+		"AyoubMrz!"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/ayoub-mrz/Fabric-Battle-Totem-1.21"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/battletotemmod/icon.png",

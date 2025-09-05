@@ -1,6 +1,7 @@
 package net.ayoubmrz.battletotemmod;
 
 import net.ayoubmrz.battletotemmod.block.ModBlocks;
+import net.ayoubmrz.battletotemmod.block.entity.ModBlockEntities;
 import net.ayoubmrz.battletotemmod.sound.ModSounds;
 import net.fabricmc.api.ModInitializer;
 
@@ -15,5 +16,6 @@ public class BattleTotemMod implements ModInitializer {
 	public void onInitialize() {
 		ModBlocks.registerModBlocks();
 		ModSounds.registerSounds();
+		ModBlockEntities.registerBlockEntities();
 	}
 }
