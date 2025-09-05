@@ -20,6 +20,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -39,18 +40,21 @@ import java.util.UUID;
 public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEntityProvider {
 
     public static final BooleanProperty USED = BooleanProperty.of("used");
+    public static final IntProperty STAGE = IntProperty.of("stage", 0, 3); // 0 = normal, 1-3 = damage stages
 
     public static final MapCodec<BattleTotemBlock> CODEC = createCodec(BattleTotemBlock::new);
     private static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 
     public BattleTotemBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(USED, false));
+        this.setDefaultState(this.stateManager.getDefaultState()
+                .with(USED, false)
+                .with(STAGE, 0));
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(FACING, USED);
+        builder.add(FACING, USED, STAGE);
     }
 
     @Override
@@ -78,6 +82,7 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof BattleTotemBlockEntity totemEntity) {
                 totemEntity.addSpawnedMobs(mobsList);
+                totemEntity.setInitialMobCount(mobsList.size());
             }
 
             // Also check if the other half has a block entity and update it
@@ -85,6 +90,7 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
             BlockEntity otherBlockEntity = world.getBlockEntity(otherPos);
             if (otherBlockEntity instanceof BattleTotemBlockEntity otherTotemEntity) {
                 otherTotemEntity.addSpawnedMobs(mobsList);
+                otherTotemEntity.setInitialMobCount(mobsList.size());
             }
 
             if (state.isOf(ModBlocks.BATTLE_TOTEM_TOP)) {
@@ -98,6 +104,45 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
             return ActionResult.SUCCESS;
         }
         return ActionResult.PASS;
+    }
+
+    public void updateStage(World world, BlockPos pos, int remainingMobs, int initialMobs) {
+        if (initialMobs <= 0) return;
+
+        BlockState state = world.getBlockState(pos);
+        if (!state.isOf(this)) return;
+
+        int newStage;
+        float ratio = (float) remainingMobs / initialMobs;
+
+        if (remainingMobs == 3) {
+            newStage = 0;
+        } else if (remainingMobs == 2) {
+            newStage = 1;
+        } else if (remainingMobs == 1) {
+            newStage = 2;
+        } else {
+            newStage = 3;
+        }
+
+        if (state.get(STAGE) != newStage) {
+            world.setBlockState(pos, state.with(STAGE, newStage), Block.NOTIFY_ALL);
+
+            world.playSound(null,
+                    pos.getX(), pos.getY(), pos.getZ(),
+                    SoundEvents.BLOCK_AMETHYST_BLOCK_STEP,
+                    SoundCategory.BLOCKS,
+                    2f,
+                    0.6f);
+
+            // Update the other half
+            BlockPos otherPos = state.isOf(ModBlocks.BATTLE_TOTEM_TOP) ? pos.down() : pos.up();
+            BlockState otherState = world.getBlockState(otherPos);
+            if ((otherState.isOf(ModBlocks.BATTLE_TOTEM_TOP) || otherState.isOf(ModBlocks.BATTLE_TOTEM_BOTTOM))
+                    && otherState.get(STAGE) != newStage) {
+                world.setBlockState(otherPos, otherState.with(STAGE, newStage), Block.NOTIFY_ALL);
+            }
+        }
     }
 
     @Override

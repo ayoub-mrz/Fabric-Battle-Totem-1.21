@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=east,used=false,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 90
+    },
+    "facing=north,used=false,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top"
+    },
+    "facing=south,used=false,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 180
+    },
+    "facing=west,used=false,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 270
+    },
+    "facing=east,used=true,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 90
+    },
+    "facing=north,used=true,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top"
+    },
+    "facing=south,used=true,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 180
+    },
+    "facing=west,used=true,stage=0": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 270
+    },
+    "facing=east,used=false,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 90
+    },
+    "facing=north,used=false,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top"
+    },
+    "facing=south,used=false,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 180
+    },
+    "facing=west,used=false,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 270
+    },
+    "facing=east,used=true,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 90
+    },
+    "facing=north,used=true,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top"
+    },
+    "facing=south,used=true,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 180
+    },
+    "facing=west,used=true,stage=1": {
+      "model": "battletotemmod:block/battle_totem_top",
+      "y": 270
+    },
+    "facing=east,used=false,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 90
+    },
+    "facing=north,used=false,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2"
+    },
+    "facing=south,used=false,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 180
+    },
+    "facing=west,used=false,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 270
+    },
+    "facing=east,used=true,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 90
+    },
+    "facing=north,used=true,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2"
+    },
+    "facing=south,used=true,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 180
+    },
+    "facing=west,used=true,stage=2": {
+      "model": "battletotemmod:block/battle_totem_top_stage2",
+      "y": 270
+    },
+    "facing=east,used=false,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 90
+    },
+    "facing=north,used=false,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3"
+    },
+    "facing=south,used=false,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 180
+    },
+    "facing=west,used=false,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 270
+    },
+    "facing=east,used=true,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 90
+    },
+    "facing=north,used=true,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3"
+    },
+    "facing=south,used=true,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 180
+    },
+    "facing=west,used=true,stage=3": {
+      "model": "battletotemmod:block/battle_totem_top_stage3",
+      "y": 270
+    }
+  }
+}
