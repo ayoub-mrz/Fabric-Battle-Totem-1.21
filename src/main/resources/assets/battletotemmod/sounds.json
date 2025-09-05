@@ -1,0 +1,8 @@
+{
+  "totem_charge": {
+    "subtitle": "sounds.battletotemmod.gronk_charge",
+    "sounds": [
+      "battletotemmod:totem_charge"
+    ]
+  }
+}

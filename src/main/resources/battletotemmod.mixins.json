@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "net.ayoubmrz.battletotemmod.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"MobDeathListenerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
