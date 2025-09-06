@@ -183,10 +183,8 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
 
     @Override
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if (world.getBlockState(pos.up().up().up()).isAir()) {
-            world.setBlockState(pos.up(), ModBlocks.BATTLE_TOTEM_TOP.getDefaultState());
-            world.setBlockState(pos, ModBlocks.BATTLE_TOTEM_BOTTOM.getDefaultState());
-        }
+        world.setBlockState(pos.up(), ModBlocks.BATTLE_TOTEM_TOP.getDefaultState());
+        world.setBlockState(pos, ModBlocks.BATTLE_TOTEM_BOTTOM.getDefaultState());
     }
 
     @Override
