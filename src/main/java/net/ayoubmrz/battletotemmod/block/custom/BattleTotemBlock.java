@@ -10,7 +10,10 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -59,7 +62,7 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (!state.get(USED)) {
+        if (!state.get(USED) && isTotem(world, pos)) {
 
             world.playSound(null,
                     pos.getX(), pos.getY(), pos.getZ(),
@@ -102,8 +105,41 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
             }
 
             return ActionResult.SUCCESS;
+        } else {
+            giveMobsGlowEffect(world, pos);
         }
         return ActionResult.PASS;
+    }
+
+    private boolean isTotem(World world, BlockPos pos) {
+
+        if (world.getBlockState(pos).isOf(ModBlocks.BATTLE_TOTEM_TOP)) {
+            if (world.getBlockState(pos.down()).isOf(ModBlocks.BATTLE_TOTEM_BOTTOM)) {
+                return true;
+            }
+        } else if (world.getBlockState(pos).isOf(ModBlocks.BATTLE_TOTEM_BOTTOM)) {
+            if (world.getBlockState(pos.up()).isOf(ModBlocks.BATTLE_TOTEM_TOP)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void giveMobsGlowEffect(World world, BlockPos pos) {
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof BattleTotemBlockEntity totemEntity) {
+            List<UUID> mobsList = totemEntity.getSpawnedMobs();
+
+            if (world instanceof ServerWorld serverWorld) {
+                for (UUID mobUUID : mobsList) {
+                    Entity entity = serverWorld.getEntity(mobUUID);
+                    if (entity instanceof LivingEntity livingEntity && livingEntity.isAlive()) {
+                        livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 200, 0));
+                    }
+                }
+            }
+        }
     }
 
     public void updateStage(World world, BlockPos pos, int remainingMobs, int initialMobs) {
@@ -169,9 +205,7 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
     protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
         BlockState aboveState = world.getBlockState(pos.up());
 
-        if (!aboveState.isAir() &&
-                !aboveState.isOf(Blocks.WATER) &&
-                !aboveState.isOf(Blocks.LAVA)) {
+        if (!aboveState.isAir() && !aboveState.isOf(Blocks.WATER) && !aboveState.isOf(Blocks.LAVA)) {
             return false;
         }
 

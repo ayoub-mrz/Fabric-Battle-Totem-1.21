@@ -8,8 +8,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -24,7 +22,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,15 +57,25 @@ public class BattleTotemBlockEntity extends BlockEntity {
         markDirty();
     }
 
+    public List<UUID> getSpawnedMobs() {
+        return new ArrayList<>(spawnedMobs);
+    }
+
     public static void tick(World world, BlockPos pos, BlockState state, BattleTotemBlockEntity blockEntity) {
 
         if (blockEntity.destroy) {
             blockEntity.destroyDelay++;
         }
 
+        if (world.getBlockState(pos.down()).isOf(Blocks.WATER)) {
+            blockEntity.destroyTotem(world, false);
+        } else {
+
+        }
+
         if (blockEntity.destroyDelay == 30) {
 
-            blockEntity.destroyTotem(world);
+            blockEntity.destroyTotem(world, true);
 
             world.playSound(null,
                     pos.getX(), pos.getY(), pos.getZ(),
@@ -124,7 +131,7 @@ public class BattleTotemBlockEntity extends BlockEntity {
         }
     }
 
-    private void destroyTotem(World world) {
+    private void destroyTotem(World world, boolean loot) {
         BlockPos bottomPos = pos;
         BlockPos topPos = pos.up();
 
@@ -140,8 +147,10 @@ public class BattleTotemBlockEntity extends BlockEntity {
         world.setBlockState(bottomPos, Blocks.AIR.getDefaultState());
 
         // Give random chest of loot
-        spawnFireworks(world, bottomPos);
-        giveLoot(world, bottomPos);
+        if (loot) {
+            spawnFireworks(world, bottomPos);
+            giveLoot(world, bottomPos);
+        }
 
         // Play breaking effects
         world.syncWorldEvent(2001, topPos, Block.getRawIdFromState(currentState));

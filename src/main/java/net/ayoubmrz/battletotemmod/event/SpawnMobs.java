@@ -1,5 +1,6 @@
 package net.ayoubmrz.battletotemmod.event;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
@@ -39,13 +40,20 @@ public class SpawnMobs {
             if (entity == null) continue;
 
             // Adjust max health
-            entity.setHealth(100);
+            entity.setHealth(85);
 
-            entity.setPosition(
-                    pos.getX() + offsets[i][0],
-                    pos.getY() + 1,
-                    pos.getZ() + offsets[i][1]
-            );
+            int x = pos.getX() + offsets[i][0];
+            int y = pos.getY();
+            int z = pos.getZ() + offsets[i][1];
+
+            int yPlus = 1;
+
+            while (!world.getBlockState(new BlockPos(x, y + yPlus, z)).isOf(Blocks.AIR)) {
+                yPlus++;
+                if (yPlus > 50) break; // Prevent searching too high
+            }
+
+            entity.setPosition(x, y + yPlus, z);
 
             // Get enchantments from registry
             RegistryWrapper.WrapperLookup registryLookup = world.getRegistryManager();
@@ -91,10 +99,10 @@ public class SpawnMobs {
 
     private static void equipMob(MobEntity entity, RegistryWrapper<Enchantment> enchantmentRegistry, String mobType) {
         // Create enchanted armor
-        ItemStack helmet = new ItemStack(Items.DIAMOND_HELMET);
-        ItemStack chestplate = new ItemStack(Items.DIAMOND_CHESTPLATE);
-        ItemStack leggings = new ItemStack(Items.DIAMOND_LEGGINGS);
-        ItemStack boots = new ItemStack(Items.DIAMOND_BOOTS);
+        ItemStack helmet = new ItemStack(Items.NETHERITE_HELMET);
+        ItemStack chestplate = new ItemStack(Items.NETHERITE_CHESTPLATE);
+        ItemStack leggings = new ItemStack(Items.NETHERITE_LEGGINGS);
+        ItemStack boots = new ItemStack(Items.NETHERITE_BOOTS);
 
         // Add enchantments to armor pieces
         helmet.addEnchantment(enchantmentRegistry.getOrThrow(Enchantments.PROTECTION), 4);
@@ -151,7 +159,7 @@ public class SpawnMobs {
             case "zombie":
             case "husk":
             default:
-                weapon = new ItemStack(Items.DIAMOND_SWORD);
+                weapon = new ItemStack(Items.NETHERITE_SWORD);
                 weapon.addEnchantment(enchantmentRegistry.getOrThrow(Enchantments.SHARPNESS), 5);
                 weapon.addEnchantment(enchantmentRegistry.getOrThrow(Enchantments.KNOCKBACK), 2);
                 weapon.addEnchantment(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), 3);
