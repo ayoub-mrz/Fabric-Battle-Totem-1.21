@@ -6,16 +6,25 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
+import net.minecraft.item.FireworkRocketItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,8 +66,17 @@ public class BattleTotemBlockEntity extends BlockEntity {
             blockEntity.destroyDelay++;
         }
 
-        if (blockEntity.destroyDelay == 60) {
+        if (blockEntity.destroyDelay == 30) {
+
             blockEntity.destroyTotem(world);
+
+            world.playSound(null,
+                    pos.getX(), pos.getY(), pos.getZ(),
+                    SoundEvents.BLOCK_RESPAWN_ANCHOR_DEPLETE,
+                    SoundCategory.BLOCKS,
+                    2f,
+                    0.6f);
+
         }
 
         if (world.isClient || !blockEntity.isActive) {
@@ -67,7 +85,7 @@ public class BattleTotemBlockEntity extends BlockEntity {
 
         blockEntity.tickCounter++;
 
-        if (blockEntity.tickCounter % 20 == 0) {
+        if (blockEntity.tickCounter % 5 == 0) {
             blockEntity.checkSpawnedMobs(world, pos, state);
         }
     }
@@ -121,11 +139,94 @@ public class BattleTotemBlockEntity extends BlockEntity {
         world.setBlockState(topPos, Blocks.AIR.getDefaultState());
         world.setBlockState(bottomPos, Blocks.AIR.getDefaultState());
 
+        // Give random chest of loot
+        spawnFireworks(world, bottomPos);
+        giveLoot(world, bottomPos);
+
         // Play breaking effects
         world.syncWorldEvent(2001, topPos, Block.getRawIdFromState(currentState));
         world.syncWorldEvent(2001, bottomPos, Block.getRawIdFromState(currentState));
 
         isActive = false;
+    }
+
+    private void giveLoot(World world, BlockPos pos) {
+        if (world.isClient) return;
+
+        BlockPos chestPos = pos;
+
+        // Place the chest block
+        world.setBlockState(chestPos, Blocks.CHEST.getDefaultState());
+
+        // Get the chest block entity
+        BlockEntity blockEntity = world.getBlockEntity(chestPos);
+        if (blockEntity instanceof ChestBlockEntity chestEntity) {
+            List<ItemStack> possibleLoot = Arrays.asList(
+                    new ItemStack(Items.DIAMOND, world.random.nextInt(8) + 1),
+                    new ItemStack(Items.GOLD_INGOT, world.random.nextInt(12) + 1),
+                    new ItemStack(Items.IRON_INGOT, world.random.nextInt(14) + 1),
+                    new ItemStack(Items.EMERALD, world.random.nextInt(9) + 1),
+                    new ItemStack(Items.GOLDEN_APPLE, world.random.nextInt(5) + 1),
+                    new ItemStack(Items.ENCHANTED_GOLDEN_APPLE),
+                    new ItemStack(Items.ENDER_PEARL, world.random.nextInt(6) + 1),
+                    new ItemStack(Items.BLAZE_ROD, world.random.nextInt(4) + 1),
+                    new ItemStack(Items.EXPERIENCE_BOTTLE, world.random.nextInt(5) + 1),
+                    new ItemStack(Items.SADDLE),
+                    new ItemStack(Items.NAME_TAG),
+                    new ItemStack(Items.BREAD, world.random.nextInt(24) + 1),
+                    new ItemStack(Items.ARROW, world.random.nextInt(32) + 1)
+            );
+
+            // Randomly fill slots with loot
+            int numItems = world.random.nextInt(16) + 3;
+            Set<Integer> usedSlots = new HashSet<>();
+
+            for (int i = 0; i < numItems; i++) {
+                int slot;
+                do {
+                    slot = world.random.nextInt(27);
+                } while (usedSlots.contains(slot));
+
+                usedSlots.add(slot);
+
+                ItemStack lootItem = possibleLoot.get(world.random.nextInt(possibleLoot.size())).copy();
+                chestEntity.setStack(slot, lootItem);
+            }
+
+            chestEntity.markDirty();
+        }
+    }
+
+    private void spawnFireworks(World world, BlockPos pos) {
+        if (!world.isClient) {
+            ServerWorld serverWorld = (ServerWorld) world;
+
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 5;
+            double z = pos.getZ() + 0.5;
+
+            // Create colorful explosion particles
+            for (int i = 0; i < 50; i++) {
+                double velocityX = (world.random.nextDouble() - 0.5) * 2.0;
+                double velocityY = (world.random.nextDouble() - 0.5) * 2.0;
+                double velocityZ = (world.random.nextDouble() - 0.5) * 2.0;
+
+                serverWorld.spawnParticles(ParticleTypes.FIREWORK,
+                        x, y, z, 5,
+                        velocityX, velocityY, velocityZ, 0.1);
+            }
+
+            for (int i = 0; i < 30; i++) {
+                double velocityX = (world.random.nextDouble() - 0.5) * 1.5;
+                double velocityY = (world.random.nextDouble() - 0.5) * 1.5;
+                double velocityZ = (world.random.nextDouble() - 0.5) * 1.5;
+
+                serverWorld.spawnParticles(ParticleTypes.END_ROD,
+                        x, y, z, 5,
+                        velocityX, velocityY, velocityZ, 0.05);
+            }
+
+        }
     }
 
     // Save data to NBT

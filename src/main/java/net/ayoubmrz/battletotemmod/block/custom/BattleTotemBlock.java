@@ -130,10 +130,10 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
 
             world.playSound(null,
                     pos.getX(), pos.getY(), pos.getZ(),
-                    SoundEvents.BLOCK_AMETHYST_BLOCK_STEP,
+                    SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE,
                     SoundCategory.BLOCKS,
-                    2f,
-                    0.6f);
+                    3f,
+                    0.6f + ((float) newStage / 10));
 
             // Update the other half
             BlockPos otherPos = state.isOf(ModBlocks.BATTLE_TOTEM_TOP) ? pos.down() : pos.up();
