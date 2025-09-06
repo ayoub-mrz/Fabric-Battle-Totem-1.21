@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -159,35 +160,35 @@ public class BattleTotemBlockEntity extends BlockEntity {
         isActive = false;
     }
 
+
     private void giveLoot(World world, BlockPos pos) {
         if (world.isClient) return;
 
         BlockPos chestPos = pos;
 
-        // Place the chest block
         world.setBlockState(chestPos, Blocks.CHEST.getDefaultState());
 
-        // Get the chest block entity
         BlockEntity blockEntity = world.getBlockEntity(chestPos);
         if (blockEntity instanceof ChestBlockEntity chestEntity) {
-            List<ItemStack> possibleLoot = Arrays.asList(
-                    new ItemStack(Items.DIAMOND, world.random.nextInt(8) + 1),
-                    new ItemStack(Items.GOLD_INGOT, world.random.nextInt(12) + 1),
-                    new ItemStack(Items.IRON_INGOT, world.random.nextInt(14) + 1),
-                    new ItemStack(Items.EMERALD, world.random.nextInt(9) + 1),
-                    new ItemStack(Items.GOLDEN_APPLE, world.random.nextInt(5) + 1),
-                    new ItemStack(Items.ENCHANTED_GOLDEN_APPLE),
-                    new ItemStack(Items.ENDER_PEARL, world.random.nextInt(6) + 1),
-                    new ItemStack(Items.BLAZE_ROD, world.random.nextInt(4) + 1),
-                    new ItemStack(Items.EXPERIENCE_BOTTLE, world.random.nextInt(5) + 1),
-                    new ItemStack(Items.SADDLE),
-                    new ItemStack(Items.NAME_TAG),
-                    new ItemStack(Items.BREAD, world.random.nextInt(24) + 1),
-                    new ItemStack(Items.ARROW, world.random.nextInt(32) + 1)
+            // Base items
+            List<Item> possibleItems = Arrays.asList(
+                    Items.DIAMOND,
+                    Items.GOLD_INGOT,
+                    Items.IRON_INGOT,
+                    Items.EMERALD,
+                    Items.GOLDEN_APPLE,
+                    Items.ENCHANTED_GOLDEN_APPLE,
+                    Items.ENDER_PEARL,
+                    Items.BLAZE_ROD,
+                    Items.EXPERIENCE_BOTTLE,
+                    Items.SADDLE,
+                    Items.NAME_TAG,
+                    Items.BREAD,
+                    Items.ARROW
             );
 
             // Randomly fill slots with loot
-            int numItems = world.random.nextInt(16) + 3;
+            int numItems = world.random.nextInt(16) + 8;
             Set<Integer> usedSlots = new HashSet<>();
 
             for (int i = 0; i < numItems; i++) {
@@ -198,12 +199,48 @@ public class BattleTotemBlockEntity extends BlockEntity {
 
                 usedSlots.add(slot);
 
-                ItemStack lootItem = possibleLoot.get(world.random.nextInt(possibleLoot.size())).copy();
+                // Select random item and create ItemStack with random amount each time
+                Item selectedItem = possibleItems.get(world.random.nextInt(possibleItems.size()));
+                ItemStack lootItem = createRandomItemStack(world, selectedItem);
+
                 chestEntity.setStack(slot, lootItem);
             }
 
             chestEntity.markDirty();
         }
+    }
+
+    private ItemStack createRandomItemStack(World world, Item item) {
+        int amount;
+
+        if (item == Items.DIAMOND) {
+            amount = world.random.nextInt(8) + 1;
+        } else if (item == Items.GOLD_INGOT) {
+            amount = world.random.nextInt(12) + 1;
+        } else if (item == Items.IRON_INGOT) {
+            amount = world.random.nextInt(14) + 1;
+        } else if (item == Items.EMERALD) {
+            amount = world.random.nextInt(9) + 1;
+        } else if (item == Items.GOLDEN_APPLE) {
+            amount = world.random.nextInt(5) + 1;
+        } else if (item == Items.ENCHANTED_GOLDEN_APPLE) {
+            amount = world.random.nextInt(2);
+        } else if (item == Items.ENDER_PEARL) {
+            amount = world.random.nextInt(6) + 1;
+        } else if (item == Items.BLAZE_ROD) {
+            amount = world.random.nextInt(4) + 1;
+        } else if (item == Items.EXPERIENCE_BOTTLE) {
+            amount = world.random.nextInt(5) + 1;
+        } else if (item == Items.BREAD) {
+            amount = world.random.nextInt(24) + 1;
+        } else if (item == Items.ARROW) {
+            amount = world.random.nextInt(32) + 1;
+        } else {
+            // For items like SADDLE and NAME_TAG
+            amount = 1;
+        }
+
+        return new ItemStack(item, amount);
     }
 
     private void spawnFireworks(World world, BlockPos pos) {
