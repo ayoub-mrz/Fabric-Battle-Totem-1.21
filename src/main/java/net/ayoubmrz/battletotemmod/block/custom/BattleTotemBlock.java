@@ -229,7 +229,7 @@ public class BattleTotemBlock extends HorizontalFacingBlock implements BlockEnti
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new BattleTotemBlockEntity(ModBlockEntities.BATTLE_TOTEM, pos, state);
+        return new BattleTotemBlockEntity(pos, state);
     }
 
     @Nullable

@@ -17,6 +17,7 @@ public class ModBlockEntities {
                 Identifier.of(BattleTotemMod.MOD_ID, "battle_totem"),
                 BlockEntityType.Builder.create(
                         BattleTotemBlockEntity::new,
+                        ModBlocks.BATTLE_TOTEM,
                         ModBlocks.BATTLE_TOTEM_TOP,
                         ModBlocks.BATTLE_TOTEM_BOTTOM
                 ).build()

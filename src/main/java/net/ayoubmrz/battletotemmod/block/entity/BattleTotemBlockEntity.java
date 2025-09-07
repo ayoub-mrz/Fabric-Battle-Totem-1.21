@@ -5,7 +5,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -37,9 +36,6 @@ public class BattleTotemBlockEntity extends BlockEntity {
     private boolean destroy = false;
     private int destroyDelay = 0;
 
-    public BattleTotemBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state);
-    }
 
     public BattleTotemBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.BATTLE_TOTEM, pos, state);
