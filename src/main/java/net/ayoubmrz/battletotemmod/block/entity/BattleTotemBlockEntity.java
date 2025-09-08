@@ -65,14 +65,12 @@ public class BattleTotemBlockEntity extends BlockEntity {
         }
 
         if (world.getBlockState(pos.down()).isOf(Blocks.WATER)) {
-            blockEntity.destroyTotem(world, false);
-        } else {
-
+            world.setBlockState(pos.down(), Blocks.STONE.getDefaultState());
         }
 
         if (blockEntity.destroyDelay == 30) {
 
-            blockEntity.destroyTotem(world, true);
+            blockEntity.destroyTotem(world);
 
             world.playSound(null,
                     pos.getX(), pos.getY(), pos.getZ(),
@@ -128,7 +126,7 @@ public class BattleTotemBlockEntity extends BlockEntity {
         }
     }
 
-    private void destroyTotem(World world, boolean loot) {
+    private void destroyTotem(World world) {
         BlockPos bottomPos = pos;
         BlockPos topPos = pos.up();
 
@@ -144,10 +142,8 @@ public class BattleTotemBlockEntity extends BlockEntity {
         world.setBlockState(bottomPos, Blocks.AIR.getDefaultState());
 
         // Give random chest of loot
-        if (loot) {
-            spawnFireworks(world, bottomPos);
-            giveLoot(world, bottomPos);
-        }
+        spawnFireworks(world, bottomPos);
+        giveLoot(world, bottomPos);
 
         // Play breaking effects
         world.syncWorldEvent(2001, topPos, Block.getRawIdFromState(currentState));
