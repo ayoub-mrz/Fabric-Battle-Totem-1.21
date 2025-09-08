@@ -1,5 +1,6 @@
 package net.ayoubmrz.battletotemmod.block.entity;
 
+import com.mojang.serialization.Codec;
 import net.ayoubmrz.battletotemmod.block.custom.BattleTotemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,11 +23,14 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BattleTotemBlockEntity extends BlockEntity {
     private Set<UUID> spawnedMobs = new HashSet<>();
@@ -268,35 +272,44 @@ public class BattleTotemBlockEntity extends BlockEntity {
         }
     }
 
-    // Save data to NBT
+    // Save data using WriteView
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        NbtList mobsList = new NbtList();
-        for (UUID uuid : spawnedMobs) {
-            mobsList.add(NbtString.of(uuid.toString()));
-        }
-        nbt.put("SpawnedMobs", mobsList);
-        nbt.putBoolean("IsActive", isActive);
-        nbt.putInt("InitialMobCount", initialMobCount);
-        nbt.putInt("LastMobCount", lastMobCount);
+        // Convert UUID list to string list for NBT storage
+        List<String> mobsStringList = spawnedMobs.stream()
+                .map(UUID::toString)
+                .collect(Collectors.toList());
+
+        view.put("SpawnedMobs", Codec.STRING.listOf(), mobsStringList);
+        view.putBoolean("IsActive", isActive);
+        view.putInt("InitialMobCount", initialMobCount);
+        view.putInt("LastMobCount", lastMobCount);
     }
 
-    // Load data from NBT
+    // Load data using ReadView
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
         spawnedMobs.clear();
-        NbtList mobsList = nbt.getListOrEmpty("SpawnedMobs");
-        for (int i = 0; i < mobsList.size(); i++) {
-            spawnedMobs.add(UUID.fromString(mobsList.getString(i).orElse("")));
-        }
 
-        isActive = nbt.getBoolean("IsActive").orElse(false);
-        initialMobCount = nbt.getInt("InitialMobCount").orElse(0);
-        lastMobCount = nbt.getInt("LastMobCount").orElse(0);
+        // Read the list of strings and convert back to UUIDs
+        view.read("SpawnedMobs", Codec.STRING.listOf()).ifPresent(mobsStringList -> {
+            for (String uuidString : mobsStringList) {
+                try {
+                    spawnedMobs.add(UUID.fromString(uuidString));
+                } catch (IllegalArgumentException e) {
+                    // Handle invalid UUID strings gracefully
+                }
+            }
+        });
+
+        // Try using read method for boolean, or it might be getBoolean
+        view.read("IsActive", Codec.BOOL).ifPresent(active -> this.isActive = active);
+        view.getOptionalInt("InitialMobCount").ifPresent(count -> this.initialMobCount = count);
+        view.getOptionalInt("LastMobCount").ifPresent(count -> this.lastMobCount = count);
     }
 
     @Nullable
