@@ -11,6 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -288,13 +289,14 @@ public class BattleTotemBlockEntity extends BlockEntity {
         super.readNbt(nbt, registryLookup);
 
         spawnedMobs.clear();
-        NbtList mobsList = nbt.getList("SpawnedMobs", 8);
+        NbtList mobsList = nbt.getListOrEmpty("SpawnedMobs");
         for (int i = 0; i < mobsList.size(); i++) {
-            spawnedMobs.add(UUID.fromString(mobsList.getString(i)));
+            spawnedMobs.add(UUID.fromString(mobsList.getString(i).orElse("")));
         }
-        isActive = nbt.getBoolean("IsActive");
-        initialMobCount = nbt.getInt("InitialMobCount");
-        lastMobCount = nbt.getInt("LastMobCount");
+
+        isActive = nbt.getBoolean("IsActive").orElse(false);
+        initialMobCount = nbt.getInt("InitialMobCount").orElse(0);
+        lastMobCount = nbt.getInt("LastMobCount").orElse(0);
     }
 
     @Nullable
