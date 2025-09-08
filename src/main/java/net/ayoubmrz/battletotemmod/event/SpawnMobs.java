@@ -57,7 +57,7 @@ public class SpawnMobs {
 
             // Get enchantments from registry
             RegistryWrapper.WrapperLookup registryLookup = world.getRegistryManager();
-            RegistryWrapper<Enchantment> enchantmentRegistry = registryLookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
+            RegistryWrapper<Enchantment> enchantmentRegistry = registryLookup.getOrThrow(RegistryKeys.ENCHANTMENT);
 
             // Equipment the mob based on its type
             equipMob(entity, enchantmentRegistry, chosenEntity);
