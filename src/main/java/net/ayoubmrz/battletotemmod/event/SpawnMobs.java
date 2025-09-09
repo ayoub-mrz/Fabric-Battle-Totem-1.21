@@ -1,11 +1,15 @@
 package net.ayoubmrz.battletotemmod.event;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.block.Portal;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
@@ -62,6 +66,13 @@ public class SpawnMobs {
             // Equipment the mob based on its type
             equipMob(entity, enchantmentRegistry, chosenEntity);
 
+            // Give Entities Effect
+            if (effectAmplifier(world, pos) == 1) {
+                entity.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, StatusEffectInstance.INFINITE, 1));
+            } else if (effectAmplifier(world, pos) == 2) {
+                entity.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, StatusEffectInstance.INFINITE, 2));
+            }
+
             world.spawnEntity(entity);
             mobsList.add(entity.getUuid());
 
@@ -76,6 +87,41 @@ public class SpawnMobs {
                 }
             }
         }
+    }
+
+    // Get Effect Amplifier base on what the player is wearing
+    private static int effectAmplifier(World world, BlockPos pos) {
+        PlayerEntity closestPlayer = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 50, false);
+
+        if (closestPlayer == null) {
+            return 0;
+        }
+
+        // Get all armor pieces
+        ItemStack helmet = closestPlayer.getInventory().getArmorStack(3);
+        ItemStack chestplate = closestPlayer.getInventory().getArmorStack(2);
+        ItemStack leggings = closestPlayer.getInventory().getArmorStack(1);
+        ItemStack boots = closestPlayer.getInventory().getArmorStack(0);
+
+        // Check for full diamond armor
+        if (helmet.getItem() == Items.DIAMOND_HELMET &&
+                chestplate.getItem() == Items.DIAMOND_CHESTPLATE &&
+                leggings.getItem() == Items.DIAMOND_LEGGINGS &&
+                boots.getItem() == Items.DIAMOND_BOOTS) {
+            System.out.println(1);
+            return 1;
+        }
+
+        // Check for full netherite armor
+        if (helmet.getItem() == Items.NETHERITE_HELMET &&
+                chestplate.getItem() == Items.NETHERITE_CHESTPLATE &&
+                leggings.getItem() == Items.NETHERITE_LEGGINGS &&
+                boots.getItem() == Items.NETHERITE_BOOTS) {
+            System.out.println(2);
+            return 2;
+        }
+        System.out.println(0);
+        return 0;
     }
 
     private static MobEntity createMobByType(String entityType, World world) {
