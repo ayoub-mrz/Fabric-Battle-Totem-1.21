@@ -98,17 +98,16 @@ public class SpawnMobs {
         }
 
         // Get all armor pieces
-        ItemStack helmet = closestPlayer.getInventory().getArmorStack(3);
-        ItemStack chestplate = closestPlayer.getInventory().getArmorStack(2);
-        ItemStack leggings = closestPlayer.getInventory().getArmorStack(1);
-        ItemStack boots = closestPlayer.getInventory().getArmorStack(0);
+        ItemStack helmet = closestPlayer.getEquippedStack(EquipmentSlot.HEAD);
+        ItemStack chestplate = closestPlayer.getEquippedStack(EquipmentSlot.CHEST);
+        ItemStack leggings = closestPlayer.getEquippedStack(EquipmentSlot.LEGS);
+        ItemStack boots = closestPlayer.getEquippedStack(EquipmentSlot.FEET);
 
         // Check for full diamond armor
         if (helmet.getItem() == Items.DIAMOND_HELMET &&
                 chestplate.getItem() == Items.DIAMOND_CHESTPLATE &&
                 leggings.getItem() == Items.DIAMOND_LEGGINGS &&
                 boots.getItem() == Items.DIAMOND_BOOTS) {
-            System.out.println(1);
             return 1;
         }
 
@@ -117,10 +116,8 @@ public class SpawnMobs {
                 chestplate.getItem() == Items.NETHERITE_CHESTPLATE &&
                 leggings.getItem() == Items.NETHERITE_LEGGINGS &&
                 boots.getItem() == Items.NETHERITE_BOOTS) {
-            System.out.println(2);
             return 2;
         }
-        System.out.println(0);
         return 0;
     }
 
